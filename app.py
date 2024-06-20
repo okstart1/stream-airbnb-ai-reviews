@@ -34,7 +34,7 @@ def create_ai_review_summary(listing_id,reviews):
     
 
 # Connect to MongoDB
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URI, appname='devrel.content.python')
 db = client[DATABASE_NAME]
 collection = db[COLLECTION_NAME]
 
