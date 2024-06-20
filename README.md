@@ -47,4 +47,6 @@ python ingest.py
      streamlit run app.py
      ```
 
-You should be able to
+You should be able to now operate the UI and add reviews and generate AI based reviews.
+
+
