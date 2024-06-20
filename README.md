@@ -36,7 +36,7 @@ This Streamlit application connects to a MongoDB database containing Airbnb rent
      MONGODB_ATLAS_URI=your_mongodb_atlas_uri
      OPENAI_API_KEY=your_openai_api_key
      ```
-4. Ingest data using Hugging Face free token:
+4. Ingest data using Hugging Face free token from [airbnb hugging face data set](https://huggingface.co/datasets/MongoDB/airbnb_embeddings):
 ```bash
 huggingface-cli login 
 python ingest.py
