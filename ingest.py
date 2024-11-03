@@ -1,16 +1,24 @@
 import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
 import datasets
 from datasets import load_dataset
 from bson import json_util
 
+# Load environment variables from .env file
+load_dotenv()
+
+# Get MongoDB Atlas URI from environment variables
+mongo_uri = os.getenv('MONGODB_ATLAS_URI')
+client = MongoClient(mongo_uri)
+
 # MongoDB Atlas URI and client setup
-uri = os.environ.get('MONGODB_ATLAS_URI')
-client = MongoClient(uri)
+# uri = os.environ.get('MONGODB_ATLAS_URI')
+# client = MongoClient(uri)
 
 # Change to the appropriate database and collection names
-db_name = 'sample_airbnb'  # Change this to your actual database name
-collection_name = 'rentals'  # Change this to your actual collection name
+db_name = os.getenv('DB_NAME')  # Change this to your actual database name
+collection_name = os.getenv('COLLECTION_NAME')  # Change this to your actual collection name
 
 collection = client[db_name][collection_name]
 

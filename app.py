@@ -1,4 +1,5 @@
 import streamlit as st
+from dotenv import load_dotenv
 from pymongo import MongoClient
 import pandas as pd
 import os
@@ -7,10 +8,13 @@ from datetime import datetime
 import openai
 import json
 
+# Load environment variables from .env file
+load_dotenv()
+
 # MongoDB connection details
 MONGO_URI = os.getenv("MONGODB_ATLAS_URI")
-DATABASE_NAME = "sample_airbnb"
-COLLECTION_NAME = "rentals"
+DATABASE_NAME = os.getenv('DB_NAME')
+COLLECTION_NAME = os.getenv('COLLECTION_NAME')
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 

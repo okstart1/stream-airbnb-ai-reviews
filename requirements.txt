@@ -3,3 +3,4 @@ pymongo
 pandas
 openai
 python-dotenv
+datasets

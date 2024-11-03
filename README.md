@@ -49,4 +49,22 @@ python ingest.py
 
 You should be able to now operate the UI and add reviews and generate AI based reviews.
 
+## Issue fixing
 
+### Issue 1 - ValueError: Invalid pattern: '**' can only be an entire path component
+
+```bash
+python -m pip install datasets
+```
+
+### Issue 2 - pymongo.errors.ServerSelectionTimeoutError
+
+Symptoms:
+
+```Bash
+pymongo.errors.ServerSelectionTimeoutError: localhost:27017: [Errno 61] Connection refused (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms), Timeout: 30s, Topology Description: <TopologyDescription id: 6726cc62646f15c803d027b5, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [Errno 61] Connection refused (configured timeouts: socketTimeoutMS: 20000.0ms, connectTimeoutMS: 20000.0ms)')>]>
+```
+
+Root Cause:
+
+The connection between db and app is broken.
