@@ -64,15 +64,20 @@ def calculate_distance_time(origin, destination):
 # Streamlit UI
 st.title("🏡 View products")
 
-# Example usage of save_deal function
-if st.button("Save Deal"):
+# Form for saving a deal
+with st.form("Save Deal"):
+    st.subheader("Enter Deal Details")
     location = st.text_input("Location")
     deal = st.text_input("Deal")
     price = st.text_input("Price")
     category = st.text_input("Category")
-    if location and deal and price and category:
-        save_deal(location, deal, price, category)
-        st.success("Deal saved successfully!")
+    submit_button = st.form_submit_button(label="Submit")
+    if submit_button:
+        if location and deal and price and category:
+            save_deal(location, deal, price, category)
+            st.success("Deal saved successfully!")
+        else:
+            st.error("Please fill in all fields.")
 
 # User input for filtering products
 st.header("Filter Products")
