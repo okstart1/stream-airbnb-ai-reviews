@@ -77,7 +77,7 @@ if st.button("Save Deal"):
 # User input for filtering products
 st.header("Filter Products")
 location_input = st.text_input("Enter Your Location")
-category_input = st.text_input("Enter Category")
+category_input = st.text_input("Enter Category", value="Drinks")
 
 # Display filtered products with distance and time
 st.header("Filtered Products")
@@ -100,6 +100,8 @@ for deal in filtered_deals:
 st.header("All Products")
 deals = get_all_deals()
 for deal in deals:
+    if category_input and deal['Category'] != category_input:
+        continue
     st.write(f"Calculating distance and time for: {deal['Location']}")
     distance, duration = calculate_distance_time(location_input, deal['Location'])
     st.write(f"Location: {deal['Location']}")
