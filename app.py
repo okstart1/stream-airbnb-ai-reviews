@@ -4,7 +4,6 @@ from pymongo import MongoClient
 import streamlit as st
 import googlemaps
 import openai
-import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -68,32 +67,16 @@ def calculate_distance_time(origin, destination):
         return None, None
 
 def generate_summary(location, deal, price, distance, duration):
-    response = openai.chat.completions.create(
-        model='gpt-4o',
+    prompt = f"Location: {location}\nDeal: {deal}\nPrice: {price}\nDistance: {distance}\nDriving Time: {duration}\n\nGenerate a summary for this deal."
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": """Generate a summary of the reviews below. JSON output only include fields like 'summary'."""},
-            {"role": "user", "content": f"Use those: {reviews}"}
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
         ],
-        temperature=0,
-        response_format={"type" : "json_object"}
+        max_tokens=100
     )
-
-    json_response = json.loads(response.choices[0].message.content)
-
-    # collection.update_one({"_id" : int(listing_id)}, {"$set": {"ai_summary": json_response}})
-    return json_response
-
-# def generate_summary(location, deal, price, distance, duration):
-#     prompt = f"Location: {location}\nDeal: {deal}\nPrice: {price}\nDistance: {distance}\nDriving Time: {duration}\n\nGenerate a summary for this deal."
-#     response = openai.chat.completions.create(
-#         model='gpt-4o',
-#         messages=[
-#             {"role": "system", "content": "You are a helpful assistant."},
-#             {"role": "user", "content": prompt}
-#         ],
-#         max_tokens=100
-#     )
-#     return response['choices'][0]['message']['content'].strip()
+    return response.choices[0].message['content'].strip()
 
 # Streamlit UI
 st.title("🏡 View products")
