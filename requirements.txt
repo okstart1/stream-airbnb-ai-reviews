@@ -1,7 +1,7 @@
 streamlit
 pymongo
 pandas
-openai
+openai==0.28
 python-dotenv
 datasets
 googlemaps
