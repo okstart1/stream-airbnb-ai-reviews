@@ -52,8 +52,6 @@ def get_filtered_deals(location, category):
     return list(collection.find(query))
 
 def calculate_distance_time(origin, destination):
-    if not origin or not destination:
-        return None, None
     try:
         result = gmaps.distance_matrix(origins=[origin], destinations=[destination], mode="driving")
         if result['rows'][0]['elements'][0]['status'] == 'OK':
@@ -85,10 +83,10 @@ def generate_summary(location, deal, price, distance, duration):
     )
     summary = response.choices[0].message['content'].strip()
     
-    # Update the document with the new summary
+    # Update the document with the new summary, distance, and duration
     collection.update_one(
         {"Location": location, "Deal": deal, "Price": price},
-        {"$set": {"Summary": summary}}
+        {"$set": {"Summary": summary, "Distance": distance, "Duration": duration}}
     )
     
     return summary
@@ -120,13 +118,25 @@ category_input = st.text_input("Enter Category", value="Drinks")
 st.header("Filtered Products")
 filtered_deals = get_filtered_deals(location_input, category_input)
 for deal in filtered_deals:
-    st.write(f"Calculating distance and time for: {deal['Location']}")
-    distance, duration = calculate_distance_time(location_input, deal['Location'])
+    distance, duration = None, None
+    if location_input:
+        if "Distance" in deal and "Duration" in deal:
+            distance = deal["Distance"]
+            duration = deal["Duration"]
+        else:
+            st.write(f"Calculating distance and time for: {deal['Location']}")
+            distance, duration = calculate_distance_time(location_input, deal['Location'])
+            collection.update_one(
+                {"_id": deal["_id"]},
+                {"$set": {"Distance": distance, "Duration": duration}}
+            )
     summary = generate_summary(deal['Location'], deal['Deal'], deal['Price'], distance, duration)
     st.write(f"Location: {deal['Location']}")
     st.write(f"Deal: {deal['Deal']}")
     st.write(f"Price: {deal['Price']}")
     st.write(f"Category: {deal['Category']}")
+    st.write(f"Distance: {distance}")
+    st.write(f"Duration: {duration}")
     st.write(f"Summary: {summary}")
     st.write("---")
 
@@ -136,12 +146,24 @@ deals = get_all_deals()
 for deal in deals:
     if category_input and deal['Category'] != category_input:
         continue
-    st.write(f"Calculating distance and time for: {deal['Location']}")
-    distance, duration = calculate_distance_time(location_input, deal['Location'])
+    distance, duration = None, None
+    if location_input:
+        if "Distance" in deal and "Duration" in deal:
+            distance = deal["Distance"]
+            duration = deal["Duration"]
+        else:
+            st.write(f"Calculating distance and time for: {deal['Location']}")
+            distance, duration = calculate_distance_time(location_input, deal['Location'])
+            collection.update_one(
+                {"_id": deal["_id"]},
+                {"$set": {"Distance": distance, "Duration": duration}}
+            )
     summary = generate_summary(deal['Location'], deal['Deal'], deal['Price'], distance, duration)
     st.write(f"Location: {deal['Location']}")
     st.write(f"Deal: {deal['Deal']}")
     st.write(f"Price: {deal['Price']}")
     st.write(f"Category: {deal['Category']}")
+    st.write(f"Distance: {distance}")
+    st.write(f"Duration: {duration}")
     st.write(f"Summary: {summary}")
     st.write("---")
