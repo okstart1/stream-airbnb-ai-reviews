@@ -123,7 +123,11 @@ for deal in filtered_deals:
     st.write(f"Calculating distance and time for: {deal['Location']}")
     distance, duration = calculate_distance_time(location_input, deal['Location'])
     summary = generate_summary(deal['Location'], deal['Deal'], deal['Price'], distance, duration)
-    st.write(summary)
+    st.write(f"Location: {deal['Location']}")
+    st.write(f"Deal: {deal['Deal']}")
+    st.write(f"Price: {deal['Price']}")
+    st.write(f"Category: {deal['Category']}")
+    st.write(f"Summary: {summary}")
     st.write("---")
 
 # Display all products
@@ -135,5 +139,9 @@ for deal in deals:
     st.write(f"Calculating distance and time for: {deal['Location']}")
     distance, duration = calculate_distance_time(location_input, deal['Location'])
     summary = generate_summary(deal['Location'], deal['Deal'], deal['Price'], distance, duration)
-    st.write(summary)
+    st.write(f"Location: {deal['Location']}")
+    st.write(f"Deal: {deal['Deal']}")
+    st.write(f"Price: {deal['Price']}")
+    st.write(f"Category: {deal['Category']}")
+    st.write(f"Summary: {summary}")
     st.write("---")
