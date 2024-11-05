@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 import streamlit as st
 import googlemaps
+import openai
+import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -12,6 +14,7 @@ MONGO_URI = os.getenv('MONGODB_ATLAS_URI')
 DATABASE_NAME = os.getenv('DB_NAME')
 COLLECTION_NAME = os.getenv('COLLECTION_NAME')
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # Connect to MongoDB
 client = MongoClient(MONGO_URI, appname='devrel.content.python')
@@ -20,6 +23,9 @@ collection = db[COLLECTION_NAME]
 
 # Initialize Google Maps client
 gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
+
+# Initialize OpenAI client
+openai.api_key = OPENAI_API_KEY
 
 def save_reviews(listing_id, new_review):
     collection.update_one({"_id": int(listing_id)}, {"$push": {"reviews": new_review}})
@@ -61,6 +67,34 @@ def calculate_distance_time(origin, destination):
         st.error(f"Google Maps API error: {e}")
         return None, None
 
+def generate_summary(location, deal, price, distance, duration):
+    response = openai.chat.completions.create(
+        model='gpt-4o',
+        messages=[
+            {"role": "system", "content": """Generate a summary of the reviews below. JSON output only include fields like 'summary'."""},
+            {"role": "user", "content": f"Use those: {reviews}"}
+        ],
+        temperature=0,
+        response_format={"type" : "json_object"}
+    )
+
+    json_response = json.loads(response.choices[0].message.content)
+
+    # collection.update_one({"_id" : int(listing_id)}, {"$set": {"ai_summary": json_response}})
+    return json_response
+
+# def generate_summary(location, deal, price, distance, duration):
+#     prompt = f"Location: {location}\nDeal: {deal}\nPrice: {price}\nDistance: {distance}\nDriving Time: {duration}\n\nGenerate a summary for this deal."
+#     response = openai.chat.completions.create(
+#         model='gpt-4o',
+#         messages=[
+#             {"role": "system", "content": "You are a helpful assistant."},
+#             {"role": "user", "content": prompt}
+#         ],
+#         max_tokens=100
+#     )
+#     return response['choices'][0]['message']['content'].strip()
+
 # Streamlit UI
 st.title("🏡 View products")
 
@@ -90,15 +124,8 @@ filtered_deals = get_filtered_deals(location_input, category_input)
 for deal in filtered_deals:
     st.write(f"Calculating distance and time for: {deal['Location']}")
     distance, duration = calculate_distance_time(location_input, deal['Location'])
-    st.write(f"Location: {deal['Location']}")
-    st.write(f"Deal: {deal['Deal']}")
-    st.write(f"Price: {deal['Price']}")
-    st.write(f"Category: {deal['Category']}")
-    if distance and duration:
-        st.write(f"Distance: {distance}")
-        st.write(f"Driving Time: {duration}")
-    else:
-        st.write("Could not calculate distance and time.")
+    summary = generate_summary(deal['Location'], deal['Deal'], deal['Price'], distance, duration)
+    st.write(summary)
     st.write("---")
 
 # Display all products
@@ -109,13 +136,6 @@ for deal in deals:
         continue
     st.write(f"Calculating distance and time for: {deal['Location']}")
     distance, duration = calculate_distance_time(location_input, deal['Location'])
-    st.write(f"Location: {deal['Location']}")
-    st.write(f"Deal: {deal['Deal']}")
-    st.write(f"Price: {deal['Price']}")
-    st.write(f"Category: {deal['Category']}")
-    if distance and duration:
-        st.write(f"Distance: {distance}")
-        st.write(f"Driving Time: {duration}")
-    else:
-        st.write("Could not calculate distance and time.")
+    summary = generate_summary(deal['Location'], deal['Deal'], deal['Price'], distance, duration)
+    st.write(summary)
     st.write("---")
