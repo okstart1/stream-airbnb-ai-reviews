@@ -67,6 +67,13 @@ def calculate_distance_time(origin, destination):
         return None, None
 
 def generate_summary(location, deal, price, distance, duration):
+    # Check if the summary already exists in the database
+    existing_deal = collection.find_one({"Location": location, "Deal": deal, "Price": price})
+    
+    if existing_deal and "Summary" in existing_deal:
+        return existing_deal["Summary"]
+    
+    # Generate a new summary using OpenAI API
     prompt = f"Location: {location}\nDeal: {deal}\nPrice: {price}\nDistance: {distance}\nDriving Time: {duration}\n\nGenerate a summary for this deal."
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -76,7 +83,15 @@ def generate_summary(location, deal, price, distance, duration):
         ],
         max_tokens=100
     )
-    return response.choices[0].message['content'].strip()
+    summary = response.choices[0].message['content'].strip()
+    
+    # Update the document with the new summary
+    collection.update_one(
+        {"Location": location, "Deal": deal, "Price": price},
+        {"$set": {"Summary": summary}}
+    )
+    
+    return summary
 
 # Streamlit UI
 st.title("🏡 View products")
