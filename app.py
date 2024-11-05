@@ -53,7 +53,7 @@ def get_filtered_deals(location, category):
 
 def calculate_distance_time(origin, destination):
     try:
-        result = gmaps.distance_matrix(origins=[origin], destinations=[destination], mode="driving")
+        result = gmaps.distance_matrix(origins=[origin], destinations=[destination], mode="driving", region="us")
         if result['rows'][0]['elements'][0]['status'] == 'OK':
             distance = result['rows'][0]['elements'][0]['distance']['text']
             duration = result['rows'][0]['elements'][0]['duration']['text']
