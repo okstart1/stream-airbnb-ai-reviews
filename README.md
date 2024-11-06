@@ -68,3 +68,38 @@ pymongo.errors.ServerSelectionTimeoutError: localhost:27017: [Errno 61] Connecti
 Root Cause:
 
 The connection between db and app is broken.
+
+## How to use RESTAPI
+
+### Save New Deal
+
+```Bash
+curl -X POST http://localhost:5000/save_deal \
+     -H "Content-Type: application/json" \
+     -d '{
+           "Location": "New York",
+           "Deal": "Special Discount",
+           "Price": "100",
+           "Category": "Drinks"
+         }'
+```
+
+### Get Filtered Deals
+
+```Bash
+curl -X GET "http://localhost:5000/get_filtered_deals?location=New%20York&category=Drinks"
+```
+
+### Generate Summary
+
+```Bash
+curl -X POST http://localhost:5000/generate_summary \
+     -H "Content-Type: application/json" \
+     -d '{
+           "Location": "New York",
+           "Deal": "Special Discount",
+           "Price": "100",
+           "Distance": "10 miles",
+           "Duration": "20 mins"
+         }'
+```

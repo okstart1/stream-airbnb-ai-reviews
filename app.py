@@ -4,6 +4,8 @@ from pymongo import MongoClient
 import streamlit as st
 import googlemaps
 import openai
+from flask import Flask, request, jsonify
+from bson import ObjectId
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,6 +27,9 @@ gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
 
 # Initialize OpenAI client
 openai.api_key = OPENAI_API_KEY
+
+# Initialize Flask app
+app = Flask(__name__)
 
 def save_reviews(listing_id, new_review):
     collection.update_one({"_id": int(listing_id)}, {"$push": {"reviews": new_review}})
@@ -90,6 +95,47 @@ def generate_summary(location, deal, price, distance, duration):
     )
     
     return summary
+
+# Flask API endpoints
+@app.route('/save_deal', methods=['POST'])
+def api_save_deal():
+    data = request.json
+    location = data.get('Location')
+    deal = data.get('Deal')
+    price = data.get('Price')
+    category = data.get('Category')
+    if location and deal and price and category:
+        save_deal(location, deal, price, category)
+        return jsonify({"message": "Deal saved successfully!"}), 200
+    else:
+        return jsonify({"error": "Please provide all required fields."}), 400
+
+@app.route('/get_filtered_deals', methods=['GET'])
+def api_get_filtered_deals():
+    try:
+        location = request.args.get('location')
+        category = request.args.get('category')
+        deals = get_filtered_deals(location, category)
+        # Convert ObjectId to string
+        for deal in deals:
+            deal['_id'] = str(deal['_id'])
+        return jsonify(deals), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/generate_summary', methods=['POST'])
+def api_generate_summary():
+    data = request.json
+    location = data.get('Location')
+    deal = data.get('Deal')
+    price = data.get('Price')
+    distance = data.get('Distance')
+    duration = data.get('Duration')
+    if location and deal and price and distance and duration:
+        summary = generate_summary(location, deal, price, distance, duration)
+        return jsonify({"summary": summary}), 200
+    else:
+        return jsonify({"error": "Please provide all required fields."}), 400
 
 # Streamlit UI
 st.title("🏡 View products")
@@ -167,3 +213,6 @@ for deal in deals:
     st.write(f"Duration: {duration}")
     st.write(f"Summary: {summary}")
     st.write("---")
+
+if __name__ == '__main__':
+    app.run(port=5000)
